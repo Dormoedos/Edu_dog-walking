@@ -1,6 +1,10 @@
 const dateEl = document.getElementById('date');
 const slotsEl = document.getElementById('slots');
-const messageEl = document.getElementById('message');
+const slotsMessageEl = document.getElementById('message');
+const feedingLastEl = document.getElementById('feeding-last');
+const feedingMessageEl = document.getElementById('feeding-message');
+const feedForm = document.getElementById('feed-form');
+const feedNameInput = document.getElementById('feed-name');
 
 let slots = [];
 // Слот, у которого сейчас открыта форма записи, и введённое в неё ФИО
@@ -8,15 +12,15 @@ let openSlotTime = null;
 let draftName = '';
 
 // kind: success | error | load (ошибка загрузки состояния)
-function showMessage(text, kind) {
-  messageEl.textContent = text;
-  messageEl.className = `message message--${kind}`;
-  messageEl.hidden = false;
+function showMessage(target, text, kind) {
+  target.textContent = text;
+  target.className = `message message--${kind}`;
+  target.hidden = false;
 }
 
-function hideMessage() {
-  messageEl.textContent = '';
-  messageEl.hidden = true;
+function hideMessage(target) {
+  target.textContent = '';
+  target.hidden = true;
 }
 
 function createElement(tag, className, text) {
@@ -26,12 +30,28 @@ function createElement(tag, className, text) {
   return el;
 }
 
+// Возвращает { ok, data } или null, если сервер недоступен
+async function postJson(url, payload) {
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json().catch(() => ({}));
+    return { ok: response.ok, data };
+  } catch (err) {
+    console.error(`Не удалось отправить запрос ${url}:`, err);
+    return null;
+  }
+}
+
 function createBookButton(slot) {
   const button = createElement('button', 'button button--primary', 'Записаться');
   button.type = 'button';
   button.addEventListener('click', () => {
     openSlotTime = slot.time;
-    hideMessage();
+    hideMessage(slotsMessageEl);
     renderSlots();
     document.getElementById(`name-${slot.time}`).focus();
   });
@@ -45,7 +65,7 @@ function createBookForm(slot) {
   const label = createElement('label', 'visually-hidden', `ФИО для записи на ${slot.time}`);
   label.htmlFor = inputId;
 
-  const input = createElement('input', 'book-form__input');
+  const input = createElement('input', 'input');
   input.id = inputId;
   input.name = 'name';
   input.placeholder = 'ФИО, например Анна Тестова';
@@ -97,6 +117,17 @@ function renderSlots() {
   slotsEl.replaceChildren(...slots.map(renderSlot));
 }
 
+function renderFeeding(lastFeeding) {
+  if (!lastFeeding) {
+    feedingLastEl.replaceChildren(createElement('span', 'feeding__empty', 'Отметок пока нет'));
+    return;
+  }
+  feedingLastEl.replaceChildren(
+    createElement('span', 'feeding__name', lastFeeding.employeeName),
+    createElement('span', 'feeding__time', lastFeeding.fedAtLabel)
+  );
+}
+
 async function loadState() {
   try {
     const response = await fetch('/api/state');
@@ -112,49 +143,66 @@ async function loadState() {
       openSlotTime = null;
     }
     renderSlots();
-    if (messageEl.classList.contains('message--load')) {
-      hideMessage();
+    renderFeeding(state.lastFeeding);
+    if (slotsMessageEl.classList.contains('message--load')) {
+      hideMessage(slotsMessageEl);
     }
   } catch (err) {
     console.error('Не удалось загрузить состояние:', err);
-    showMessage('Не удалось загрузить слоты. Обновите страницу.', 'load');
+    showMessage(slotsMessageEl, 'Не удалось загрузить данные. Обновите страницу.', 'load');
   }
 }
 
 async function bookSlot(time, rawName, submitButton) {
   if (!rawName.trim()) {
-    showMessage('Введите ФИО', 'error');
+    showMessage(slotsMessageEl, 'Введите ФИО', 'error');
     return;
   }
 
   submitButton.disabled = true;
-  let response;
-  let data = {};
-  try {
-    response = await fetch('/api/book', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ time, name: rawName }),
-    });
-    data = await response.json().catch(() => ({}));
-  } catch (err) {
-    console.error('Не удалось отправить запись:', err);
+  const result = await postJson('/api/book', { time, name: rawName });
+
+  if (!result) {
+    showMessage(slotsMessageEl, 'Нет связи с сервером. Попробуйте ещё раз.', 'error');
     submitButton.disabled = false;
-    showMessage('Нет связи с сервером. Попробуйте ещё раз.', 'error');
     return;
   }
 
-  if (response.ok) {
+  if (result.ok) {
     openSlotTime = null;
     draftName = '';
-    showMessage(`Вы записаны на ${data.time}: ${data.bookedBy}`, 'success');
+    showMessage(slotsMessageEl, `Вы записаны на ${result.data.time}: ${result.data.bookedBy}`, 'success');
   } else {
-    showMessage(data.error || 'Не удалось записаться', 'error');
+    showMessage(slotsMessageEl, result.data.error || 'Не удалось записаться', 'error');
   }
 
   // После любого ответа показываем актуальное состояние из базы
   await loadState();
   submitButton.disabled = false;
 }
+
+feedForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const submitButton = feedForm.querySelector('button[type="submit"]');
+
+  if (!feedNameInput.value.trim()) {
+    showMessage(feedingMessageEl, 'Введите ФИО', 'error');
+    return;
+  }
+
+  submitButton.disabled = true;
+  const result = await postJson('/api/feed', { name: feedNameInput.value });
+
+  if (!result) {
+    showMessage(feedingMessageEl, 'Нет связи с сервером. Попробуйте ещё раз.', 'error');
+  } else if (result.ok) {
+    feedNameInput.value = '';
+    showMessage(feedingMessageEl, 'Кормление отмечено', 'success');
+    await loadState();
+  } else {
+    showMessage(feedingMessageEl, result.data.error || 'Не удалось отметить кормление', 'error');
+  }
+  submitButton.disabled = false;
+});
 
 loadState();

@@ -18,6 +18,17 @@
       <p class="message" id="message" role="status" hidden></p>
       <ul class="slots" id="slots"></ul>
     </section>
+
+    <section class="card" aria-labelledby="feeding-title">
+      <h2 id="feeding-title">Последнее кормление</h2>
+      <div class="feeding" id="feeding-last">Загрузка…</div>
+      <p class="message" id="feeding-message" role="status" hidden></p>
+      <form class="feed-form" id="feed-form">
+        <label class="visually-hidden" for="feed-name">ФИО того, кто покормил Бориса</label>
+        <input class="input" id="feed-name" name="name" placeholder="ФИО, например Илья Примеров" autocomplete="name" required>
+        <button class="button button--primary" type="submit">Отметить кормление</button>
+      </form>
+    </section>
   </main>
 
   <script src="/app.js"></script>

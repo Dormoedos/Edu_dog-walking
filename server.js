@@ -8,6 +8,8 @@ const {
   ensureSlotsForDate,
   getTodaySlots,
   bookSlot,
+  addFeeding,
+  getLastFeeding,
 } = require('./db');
 
 // Не 3000: на этом порту часто уже работают другие локальные проекты
@@ -55,6 +57,21 @@ function formatDateLabel(isoDate) {
   }).format(new Date(`${isoDate}T00:00:00Z`));
 }
 
+// «17 октября в 21:50» по московскому времени для момента в ISO (UTC)
+function formatMoscowDateTime(isoDateTime) {
+  return new Intl.DateTimeFormat('ru-RU', {
+    timeZone: 'Europe/Moscow',
+    day: 'numeric',
+    month: 'long',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(isoDateTime));
+}
+
+function withFeedingLabel(feeding) {
+  return feeding && { ...feeding, fedAtLabel: formatMoscowDateTime(feeding.fedAt) };
+}
+
 function readJson(req) {
   return new Promise((resolve, reject) => {
     const chunks = [];
@@ -95,7 +112,23 @@ function normalizeName(value) {
 
 function handleState(res) {
   const { date, slots } = getTodaySlots();
-  sendJson(res, 200, { date, dateLabel: formatDateLabel(date), slots });
+  sendJson(res, 200, {
+    date,
+    dateLabel: formatDateLabel(date),
+    slots,
+    lastFeeding: withFeedingLabel(getLastFeeding()),
+  });
+}
+
+async function handleFeed(req, res) {
+  const body = await readJson(req);
+  const name = normalizeName(body.name);
+
+  if (!name) {
+    throw new HttpError(400, 'Введите ФИО');
+  }
+
+  sendJson(res, 200, withFeedingLabel(addFeeding(name)));
 }
 
 async function handleBook(req, res) {
@@ -138,6 +171,11 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === 'POST' && pathname === '/api/book') {
       await handleBook(req, res);
+      return;
+    }
+
+    if (req.method === 'POST' && pathname === '/api/feed') {
+      await handleFeed(req, res);
       return;
     }
 

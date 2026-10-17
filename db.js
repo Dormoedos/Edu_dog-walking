@@ -87,6 +87,26 @@ function bookSlot(slotTime, name) {
   return result.changes === 1;
 }
 
+const insertFeeding = db.prepare(
+  'INSERT INTO feedings (employee_name, fed_at) VALUES (?, ?)'
+);
+
+// Время кормления ставит сервер в момент отметки (UTC, ISO), поэтому последняя отметка — самая поздняя
+function addFeeding(name) {
+  const fedAt = new Date().toISOString();
+  insertFeeding.run(name, fedAt);
+  return { employeeName: name, fedAt };
+}
+
+const selectLastFeeding = db.prepare(
+  'SELECT employee_name, fed_at FROM feedings ORDER BY fed_at DESC, id DESC LIMIT 1'
+);
+
+function getLastFeeding() {
+  const row = selectLastFeeding.get();
+  return row ? { employeeName: row.employee_name, fedAt: row.fed_at } : null;
+}
+
 module.exports = {
   db,
   DB_PATH,
@@ -95,4 +115,6 @@ module.exports = {
   ensureSlotsForDate,
   getTodaySlots,
   bookSlot,
+  addFeeding,
+  getLastFeeding,
 };
