@@ -32,14 +32,14 @@
 | 1 | [01-date-five-slots.png](screenshots/01-date-five-slots.png) | Дата «Суббота, 17 октября 2026 г.», пять свободных слотов, «Отметок пока нет» | ✅ |
 | 2 | [02-free-and-booked.png](screenshots/02-free-and-booked.png) | Свободные слоты зелёные с кнопкой, занятые `09:00` и `13:00` серые с ФИО | ✅ |
 | 3 | [03a-booking-form.png](screenshots/03a-booking-form.png), [03-booking-success.png](screenshots/03-booking-success.png) | Форма записи у свободного слота; «Вы записаны на 09:00: …» и занятый слот | ✅ |
-| 4 | `04-conflict.png` | Вкладка или браузер, открытые до записи: красное «Слот занят», исходное ФИО в слоте не изменилось | ❌ нет скриншота |
+| 4 | [04-conflict.png](screenshots/04-conflict.png) | Chrome, страница открыта до записи: красное «Слот занят»; после отказа слоты перезагружены, занятые слоты сохранили исходные ФИО | ✅ |
 | 5 | [05-second-browser-narrow.png](screenshots/05-second-browser-narrow.png) | Chrome показывает записи `09:00` и `13:00`, сделанные во встроенном браузере Claude | ✅ |
 | 6 | [06-feeding-card.png](screenshots/06-feeding-card.png) | Карточка «Последнее кормление» с ФИО и временем, «Кормление отмечено» | ✅ |
 | 7 | [05-second-browser-narrow.png](screenshots/05-second-browser-narrow.png) | Chrome, iPhone 16 (393px): «Вы записаны на 17:00…», кнопка «Записаться» отдельной строкой, «Свободно» не обрезано | ✅ (тот же кадр, что для DoD 5) |
 
 Дополнительно: [ai-iteration-chat.png](screenshots/ai-iteration-chat.png) — окно Claude с диалогом (приёмка этапа 7) рядом с работающим приложением.
 
-Скриншоты прислал студент 2026-10-17; агент сохранил их в PNG и сопоставил с DoD. Кадр для DoD 2 — правая часть `ai-iteration-chat.png`.
+Все семь DoD покрыты скриншотами. Скриншоты прислал студент 2026-10-17; агент сохранил их в PNG и сопоставил с DoD. Кадр для DoD 2 — правая часть `ai-iteration-chat.png`.
 
 ## Предварительная проверка агентом (не зачётная)
 
