@@ -35,8 +35,12 @@ function sendText(res, status, text) {
   res.end(text);
 }
 
+// no-store: состояние всегда читается из базы, а не из кэша браузера
 function sendJson(res, status, data) {
-  res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
+  res.writeHead(status, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store',
+  });
   res.end(JSON.stringify(data));
 }
 
