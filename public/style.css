@@ -224,3 +224,20 @@ body {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* Узкий экран: в строке не помещаются время, статус и кнопка, поэтому кнопка
+   уходит на отдельную строку, как открытая форма записи */
+@media (max-width: 480px) {
+  .card {
+    padding: 16px;
+  }
+
+  .slot {
+    padding: 12px 14px;
+  }
+
+  .slot > .button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
