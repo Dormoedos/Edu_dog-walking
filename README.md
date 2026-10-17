@@ -75,7 +75,8 @@ sqlite3 boris.db "UPDATE walk_slots SET booked_by=NULL, booked_at=NULL"
 
 - Код: [github.com/Dormoedos/Edu_dog-walking](https://github.com/Dormoedos/Edu_dog-walking), ветка `main`. Для ревью — pull request `main` → `sprint_1`, где `sprint_1` указывает на первый коммит, поэтому в PR виден весь проект.
 - Этапы, статусы и фактические проверки каждого этапа — [PLAN.md](PLAN.md).
-- Протокол итогового smoke-check и список семи скриншотов — [docs/smoke-check.md](docs/smoke-check.md).
+- Протокол итогового smoke-check и скриншоты по DoD — [docs/smoke-check.md](docs/smoke-check.md), файлы в [docs/screenshots/](docs/screenshots/).
+- Демо-видео — [Яндекс Диск](https://disk.yandex.ru/i/LpR19EIN_9VEwg).
 - Карточка кейса и сценарий демо — [docs/case-card.md](docs/case-card.md).
 - След ключевой итерации с ИИ — [docs/ai-iteration.md](docs/ai-iteration.md).
 
