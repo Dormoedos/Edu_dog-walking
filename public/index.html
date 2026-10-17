@@ -4,9 +4,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Кто выгуливает Бориса</title>
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <h1>Кто выгуливает Бориса</h1>
-  <p>Каркас приложения работает. Слоты и кормление появятся на следующих этапах.</p>
+  <main class="page">
+    <header class="header">
+      <h1>Кто выгуливает Бориса</h1>
+      <p class="date" id="date">Загрузка…</p>
+    </header>
+
+    <section class="card" aria-labelledby="slots-title">
+      <h2 id="slots-title">Прогулки на сегодня</h2>
+      <p class="message" id="message" role="status" hidden></p>
+      <ul class="slots" id="slots"></ul>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
 </body>
 </html>

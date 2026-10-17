@@ -58,4 +58,19 @@ function ensureSlotsForDate(walkDate) {
   }
 }
 
-module.exports = { db, DB_PATH, SLOT_TIMES, getMoscowDate, ensureSlotsForDate };
+const selectSlots = db.prepare(
+  'SELECT slot_time, booked_by FROM walk_slots WHERE walk_date = ? ORDER BY slot_time'
+);
+
+// Слоты на сегодня; создаются при каждом запросе, чтобы после полуночи новый день появлялся без перезапуска
+function getTodaySlots() {
+  const walkDate = getMoscowDate();
+  ensureSlotsForDate(walkDate);
+  const slots = selectSlots.all(walkDate).map((row) => ({
+    time: row.slot_time,
+    bookedBy: row.booked_by,
+  }));
+  return { date: walkDate, slots };
+}
+
+module.exports = { db, DB_PATH, SLOT_TIMES, getMoscowDate, ensureSlotsForDate, getTodaySlots };

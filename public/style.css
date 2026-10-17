@@ -1,0 +1,128 @@
+:root {
+  --bg: #f5f3ef;
+  --surface: #ffffff;
+  --text: #1f1d1a;
+  --text-muted: #6b665e;
+  --border: #e2ddd4;
+  --free: #1f7a4d;
+  --free-bg: #e6f4ec;
+  --booked: #6b665e;
+  --booked-bg: #efece7;
+  --error: #b42318;
+  --error-bg: #fdecea;
+  --radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.4;
+}
+
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+.date {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 1.05rem;
+}
+
+.date::first-letter {
+  text-transform: uppercase;
+}
+
+.card {
+  margin-top: 24px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.card h2 {
+  margin: 0 0 16px;
+  font-size: 1.2rem;
+}
+
+.message {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--error-bg);
+  color: var(--error);
+}
+
+.slots {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.slot {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: 16px;
+  row-gap: 4px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border-left: 6px solid;
+}
+
+.slot--free {
+  background: var(--free-bg);
+  border-left-color: var(--free);
+}
+
+.slot--booked {
+  background: var(--booked-bg);
+  border-left-color: var(--booked);
+}
+
+.slot__time {
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.slot__status {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.slot--free .slot__status {
+  color: var(--free);
+}
+
+.slot--booked .slot__status {
+  color: var(--booked);
+}
+
+/* У занятого слота справа две строки: статус и ФИО */
+.slot--booked .slot__time {
+  grid-row: span 2;
+}
+
+.slot__name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
