@@ -1,11 +1,19 @@
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
-const { DB_PATH, getMoscowDate, ensureSlotsForDate, getTodaySlots } = require('./db');
+const {
+  DB_PATH,
+  SLOT_TIMES,
+  getMoscowDate,
+  ensureSlotsForDate,
+  getTodaySlots,
+  bookSlot,
+} = require('./db');
 
 // Не 3000: на этом порту часто уже работают другие локальные проекты
 const PORT = Number(process.env.PORT) || 3100;
 const PUBLIC_DIR = path.join(__dirname, 'public');
+const MAX_BODY_BYTES = 10 * 1024;
 
 // Отдаём только явно перечисленные файлы, без обхода папки по произвольному пути
 const STATIC_FILES = {
@@ -13,6 +21,14 @@ const STATIC_FILES = {
   '/app.js': { file: 'app.js', type: 'text/javascript; charset=utf-8' },
   '/style.css': { file: 'style.css', type: 'text/css; charset=utf-8' },
 };
+
+// Ошибка с HTTP-статусом и понятным пользователю текстом
+class HttpError extends Error {
+  constructor(status, message) {
+    super(message);
+    this.status = status;
+  }
+}
 
 function sendText(res, status, text) {
   res.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8' });
@@ -35,9 +51,64 @@ function formatDateLabel(isoDate) {
   }).format(new Date(`${isoDate}T00:00:00Z`));
 }
 
+function readJson(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let size = 0;
+
+    req.on('data', (chunk) => {
+      size += chunk.length;
+      if (size > MAX_BODY_BYTES) {
+        // Дочитываем тело вхолостую, чтобы успеть отправить ответ
+        req.removeAllListeners('data');
+        req.resume();
+        reject(new HttpError(413, 'Слишком большой запрос'));
+        return;
+      }
+      chunks.push(chunk);
+    });
+
+    req.on('end', () => {
+      try {
+        const body = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+        if (typeof body !== 'object' || body === null) {
+          throw new Error('Тело запроса — не объект');
+        }
+        resolve(body);
+      } catch {
+        reject(new HttpError(400, 'Некорректный запрос'));
+      }
+    });
+
+    req.on('error', reject);
+  });
+}
+
+// Убирает пробелы по краям и схлопывает повторные пробелы внутри
+function normalizeName(value) {
+  return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ') : '';
+}
+
 function handleState(res) {
   const { date, slots } = getTodaySlots();
   sendJson(res, 200, { date, dateLabel: formatDateLabel(date), slots });
+}
+
+async function handleBook(req, res) {
+  const body = await readJson(req);
+  const name = normalizeName(body.name);
+
+  if (!SLOT_TIMES.includes(body.time)) {
+    throw new HttpError(400, 'Такого слота нет');
+  }
+  if (!name) {
+    throw new HttpError(400, 'Введите ФИО');
+  }
+  if (!bookSlot(body.time, name)) {
+    throw new HttpError(409, 'Слот занят');
+  }
+
+  sendJson(res, 200, { time: body.time, bookedBy: name });
 }
 
 function handleStatic(res, staticFile) {
@@ -52,12 +123,17 @@ function handleStatic(res, staticFile) {
   });
 }
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   const { pathname } = new URL(req.url, 'http://localhost');
 
   try {
     if (req.method === 'GET' && pathname === '/api/state') {
       handleState(res);
+      return;
+    }
+
+    if (req.method === 'POST' && pathname === '/api/book') {
+      await handleBook(req, res);
       return;
     }
 
@@ -69,6 +145,10 @@ const server = http.createServer((req, res) => {
 
     sendText(res, 404, 'Не найдено');
   } catch (err) {
+    if (err instanceof HttpError) {
+      sendJson(res, err.status, { error: err.message });
+      return;
+    }
     console.error('Ошибка обработки запроса:', err);
     sendJson(res, 500, { error: 'Ошибка сервера' });
   }

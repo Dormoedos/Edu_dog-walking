@@ -10,6 +10,8 @@
   --booked-bg: #efece7;
   --error: #b42318;
   --error-bg: #fdecea;
+  --success: #1f7a4d;
+  --success-bg: #e6f4ec;
   --radius: 12px;
 }
 
@@ -63,8 +65,18 @@ body {
   margin: 0 0 16px;
   padding: 10px 12px;
   border-radius: 8px;
+  font-weight: 600;
+}
+
+.message--error,
+.message--load {
   background: var(--error-bg);
   color: var(--error);
+}
+
+.message--success {
+  background: var(--success-bg);
+  color: var(--success);
 }
 
 .slots {
@@ -77,10 +89,10 @@ body {
 
 .slot {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   column-gap: 16px;
-  row-gap: 4px;
+  row-gap: 12px;
   padding: 14px 16px;
   border-radius: 10px;
   border-left: 6px solid;
@@ -102,6 +114,12 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+.slot__info {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
 .slot__status {
   font-size: 0.85rem;
   font-weight: 600;
@@ -117,12 +135,69 @@ body {
   color: var(--booked);
 }
 
-/* У занятого слота справа две строки: статус и ФИО */
-.slot--booked .slot__time {
-  grid-row: span 2;
-}
-
 .slot__name {
   font-weight: 600;
   overflow-wrap: anywhere;
+}
+
+.button {
+  min-height: 40px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.button--primary {
+  background: var(--free);
+  color: #ffffff;
+}
+
+.button--secondary {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text);
+}
+
+/* Форма записи занимает всю ширину карточки под временем */
+.book-form {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.book-form__input {
+  flex: 1 1 220px;
+  min-width: 0;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.book-form__input:focus,
+.button:focus-visible {
+  outline: 2px solid var(--free);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }

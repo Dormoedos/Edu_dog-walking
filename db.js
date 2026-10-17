@@ -73,4 +73,26 @@ function getTodaySlots() {
   return { date: walkDate, slots };
 }
 
-module.exports = { db, DB_PATH, SLOT_TIMES, getMoscowDate, ensureSlotsForDate, getTodaySlots };
+const bookFreeSlot = db.prepare(
+  `UPDATE walk_slots SET booked_by = ?, booked_at = ?
+   WHERE walk_date = ? AND slot_time = ? AND booked_by IS NULL`
+);
+
+// Одна атомарная операция: ФИО записывается, только если слот на сегодня ещё свободен.
+// Возвращает false, если слот уже занят — первоначальная запись не меняется.
+function bookSlot(slotTime, name) {
+  const walkDate = getMoscowDate();
+  ensureSlotsForDate(walkDate);
+  const result = bookFreeSlot.run(name, new Date().toISOString(), walkDate, slotTime);
+  return result.changes === 1;
+}
+
+module.exports = {
+  db,
+  DB_PATH,
+  SLOT_TIMES,
+  getMoscowDate,
+  ensureSlotsForDate,
+  getTodaySlots,
+  bookSlot,
+};
