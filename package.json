@@ -1,0 +1,13 @@
+{
+  "name": "who-walks-boris",
+  "version": "0.1.0",
+  "description": "Учебный micro-MVP «Кто выгуливает Бориса»: запись на прогулку с псом и карточка последнего кормления",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
