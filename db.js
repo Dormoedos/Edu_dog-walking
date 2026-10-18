@@ -1,7 +1,10 @@
 const path = require('node:path');
 const { DatabaseSync } = require('node:sqlite');
 
-const DB_PATH = path.join(__dirname, 'boris.db');
+// DB_PATH позволяет держать базу вне репозитория, например для проверок; по умолчанию — boris.db в папке проекта
+const DB_PATH = process.env.DB_PATH
+  ? path.resolve(process.env.DB_PATH)
+  : path.join(__dirname, 'boris.db');
 const TIME_ZONE = 'Europe/Moscow';
 const SLOT_TIMES = ['09:00', '11:00', '13:00', '15:00', '17:00'];
 
